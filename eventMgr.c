@@ -4,7 +4,7 @@
 #include "calcs.h"
 
 void HandleEvents(bool *running, Camera *cam, float rotSpeed, float moveSpeed, 
-        float PITCH_LIMIT, float deltaTime) {
+        float PITCH_LIMIT, float deltaTime, float MOUSE_SENSITIVITY) {
     // We define our event here for simplicity
     SDL_Event event;
 
@@ -22,8 +22,8 @@ void HandleEvents(bool *running, Camera *cam, float rotSpeed, float moveSpeed,
     const bool *keys = SDL_GetKeyboardState(NULL);
 
     // Adjust rotation (to be removed)
-    if (keys[SDL_SCANCODE_RIGHT]) cam->yaw -= rotSpeed * deltaTime;
-    if (keys[SDL_SCANCODE_LEFT]) cam->yaw += rotSpeed * deltaTime;
+    if (keys[SDL_SCANCODE_RIGHT]) cam->yaw += rotSpeed * deltaTime;
+    if (keys[SDL_SCANCODE_LEFT]) cam->yaw -= rotSpeed * deltaTime;
     if (keys[SDL_SCANCODE_UP]) cam->pitch += rotSpeed * deltaTime;
     if (keys[SDL_SCANCODE_DOWN]) cam->pitch -= rotSpeed * deltaTime;
 
@@ -44,9 +44,17 @@ void HandleEvents(bool *running, Camera *cam, float rotSpeed, float moveSpeed,
         cam->position = vec3_add(cam->position, vec3_scale(forward, moveSpeed * deltaTime));
     }
     if (keys[SDL_SCANCODE_A]) {
-        cam->position = vec3_sub(cam->position, vec3_scale(right, moveSpeed * deltaTime));
-    }
-    if (keys[SDL_SCANCODE_D]) {
         cam->position = vec3_add(cam->position, vec3_scale(right, moveSpeed * deltaTime));
     }
+    if (keys[SDL_SCANCODE_D]) {
+        cam->position = vec3_sub(cam->position, vec3_scale(right, moveSpeed * deltaTime));
+    }
+
+    // Handle mouse movement for camera rotation
+    float mouse_delta_x;
+    float mouse_delta_y;
+    SDL_GetRelativeMouseState(&mouse_delta_x, &mouse_delta_y);
+    
+    cam->yaw += mouse_delta_x * MOUSE_SENSITIVITY;
+    cam->pitch -= mouse_delta_y * MOUSE_SENSITIVITY;
 }

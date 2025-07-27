@@ -101,8 +101,8 @@ int main(int argc, char* argv[]) {
     bool running = true;
     SDL_Event event;
 
-    const float moveSpeed = 1.0f;
-    const float rotSpeed = 0.02f;
+    const float moveSpeed = 2.0f;
+    const float rotSpeed = 1.0f;
 
     uint64_t lastTime = SDL_GetPerformanceCounter();
     double freq = (double)SDL_GetPerformanceFrequency();
@@ -123,14 +123,7 @@ int main(int argc, char* argv[]) {
             frames = 0;
         }
 
-        HandleEvents(&running, &cam, rotSpeed, moveSpeed, PITCH_LIMIT, deltaTime);
-
-        float mouse_delta_x;
-        float mouse_delta_y;
-        SDL_GetRelativeMouseState(&mouse_delta_x, &mouse_delta_y);
-        
-        cam.yaw -= mouse_delta_x * MOUSE_SENSITIVITY;
-        cam.pitch -= mouse_delta_y * MOUSE_SENSITIVITY;
+        HandleEvents(&running, &cam, rotSpeed, moveSpeed, PITCH_LIMIT, deltaTime, MOUSE_SENSITIVITY);
 
         Vec3 cam_forward = get_camera_forward(cam);
         Vec3 cam_target  = vec3_add(cam.position, cam_forward);

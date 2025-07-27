@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2.18)
+cmake_minimum_required(VERSION 3.10.18)
 project(CRasterizer C)
 
 set(CMAKE_C_STANDARD 99)

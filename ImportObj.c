@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ImportObj.h"
+#include "calcs.h"  // Include your calcs header
 
 #define MAX_VERTS 50000
 #define MAX_TRIS  100000
@@ -25,6 +26,9 @@ Triangle* LoadObjTriangles(const char* filename, int* out_count) {
         if (line[0] == 'v' && line[1] == ' ') {
             Vec3 v;
             sscanf(line, "v %f %f %f", &v.x, &v.y, &v.z);
+            // Invert Y axis here
+            v.y = -v.y;
+
             if (vert_count < MAX_VERTS) {
                 verts[vert_count++] = v;
             }
@@ -39,10 +43,11 @@ Triangle* LoadObjTriangles(const char* filename, int* out_count) {
             if (token) i2 = atoi(token);
 
             if (i0 > 0 && i1 > 0 && i2 > 0 && tri_count < MAX_TRIS) {
+                // Swap i1 and i2 to invert winding (flip normals)
                 Triangle tri = {
                     .v0.pos = verts[i0 - 1],
-                    .v1.pos = verts[i1 - 1],
-                    .v2.pos = verts[i2 - 1],
+                    .v1.pos = verts[i2 - 1],  // swapped
+                    .v2.pos = verts[i1 - 1],  // swapped
                 };
                 tris[tri_count++] = tri;
             }

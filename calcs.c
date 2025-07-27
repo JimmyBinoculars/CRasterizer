@@ -132,9 +132,9 @@ Mat4 mat4_perspective(float fov_y_rad, float aspect, float near_z, float far_z) 
 }
 
 Mat4 mat4_look_at(Vec3 eye, Vec3 center, Vec3 up) {
-    Vec3 f = vec3_normalize(vec3_sub(center, eye));
-    Vec3 s = vec3_normalize(vec3_cross(f, up));
-    Vec3 u = vec3_cross(s, f);
+    Vec3 f = vec3_normalize(vec3_sub(center, eye));    // forward
+    Vec3 s = vec3_normalize(vec3_cross(up, f));        // right = up × forward
+    Vec3 u = vec3_cross(f, s);                          // up = forward × right
 
     Mat4 m = mat4_identity();
     m.m[0][0] = s.x; m.m[0][1] = s.y; m.m[0][2] = s.z;

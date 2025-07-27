@@ -4,6 +4,6 @@
 #define EVENTMGR_H
 
 void HandleEvents(bool *running, Camera *cam, float rotSpeed, float moveSpeed, float PITCH_LIMIT, 
-        float deltaTime);
+        float deltaTime, float MOUSE_SENSITIVITY);
 
 #endif
