@@ -3,6 +3,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 
 int WindowInit(SDL_Window **window, SDL_Renderer **rend, int width, int height) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -89,21 +90,98 @@ void DrawTriangle(SDL_Renderer *ren, Triangle tri,
 }
 
 SDL_Texture* DrawText(char *message, SDL_Color txtColour, SDL_Renderer *ren, TTF_Font *font) {
-    SDL_Texture *texture = NULL;
+    if (!message || !font || !ren) return NULL;
 
-    SDL_Surface *text = TTF_RenderText_Blended(font, message, 0, txtColour);
-
-    if (text) {
-        texture = SDL_CreateTextureFromSurface(ren, text);
-        SDL_DestroySurface(text);
+    // Duplicate message for tokenizing
+    char *msgCopy = strdup(message);
+    if (!msgCopy) {
+        fprintf(stderr, "Failed to allocate memory for message copy\n");
+        return NULL;
     }
-    if (!text) {
-        fprintf(stderr, "Failed to create text surface: %s\n", SDL_GetError());
+
+    // Count lines
+    int linesCount = 1;
+    for (const char *p = message; *p; p++) {
+        if (*p == '\n') linesCount++;
+    }
+
+    // Allocate lines array
+    char **lines = (char **)malloc(linesCount * sizeof(char *));
+    if (!lines) {
+        free(msgCopy);
+        fprintf(stderr, "Failed to allocate memory for lines array\n");
+        return NULL;
+    }
+
+    // Tokenize lines
+    int idx = 0;
+    char *line = strtok(msgCopy, "\n");
+    while (line && idx < linesCount) {
+        lines[idx++] = line;
+        line = strtok(NULL, "\n");
+    }
+
+    // Render each line to surface, compute total size
+    SDL_Surface **surfaces = (SDL_Surface **)malloc(linesCount * sizeof(SDL_Surface *));
+    if (!surfaces) {
+        free(lines);
+        free(msgCopy);
+        fprintf(stderr, "Failed to allocate memory for surfaces\n");
+        return NULL;
+    }
+
+    int totalHeight = 0;
+    int maxWidth = 0;
+    for (int i = 0; i < linesCount; i++) {
+        surfaces[i] = TTF_RenderText_Blended(font, lines[i], 0, txtColour);
+        if (!surfaces[i]) {
+            fprintf(stderr, "Failed to render line %d: %s\n", i, SDL_GetError());
+            for (int j = 0; j < i; j++) SDL_DestroySurface(surfaces[j]);
+            free(surfaces);
+            free(lines);
+            free(msgCopy);
+            return NULL;
+        }
+        if (surfaces[i]->w > maxWidth) maxWidth = surfaces[i]->w;
+        totalHeight += surfaces[i]->h;
+    }
+
+    // Create combined surface with allocated pixel format
+    SDL_Surface *combined = SDL_CreateSurface(maxWidth, totalHeight, SDL_PIXELFORMAT_RGBA32);
+    if (!combined) {
+        fprintf(stderr, "Failed to create combined surface: %s\n", SDL_GetError());
+        for (int i = 0; i < linesCount; i++) SDL_DestroySurface(surfaces[i]);
+        free(surfaces);
+        free(lines);
+        free(msgCopy);
+        return NULL;
+    }
+
+    // Blit each line onto combined surface
+    int yOffset = 0;
+    for (int i = 0; i < linesCount; i++) {
+        SDL_Rect dstRect = {0, yOffset, surfaces[i]->w, surfaces[i]->h};
+        SDL_BlitSurface(surfaces[i], NULL, combined, &dstRect);
+        yOffset += surfaces[i]->h;
+        SDL_DestroySurface(surfaces[i]);
+    }
+
+    free(surfaces);
+    free(lines);
+    free(msgCopy);
+
+    // Create texture from combined surface
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(ren, combined);
+    SDL_DestroySurface(combined);
+
+    if (!texture) {
+        fprintf(stderr, "Failed to create texture from combined surface: %s\n", SDL_GetError());
         return NULL;
     }
 
     return texture;
 }
+
 
 void renderLoop(SDL_Renderer *ren, int window_height, int window_width, float *zbuffer, int triangleCount, 
         Mat4 view, Mat4 model, Triangle *tris, Camera cam, Mat4 mvp, Vec4 *triangleColours, 

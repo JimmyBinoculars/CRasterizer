@@ -157,7 +157,8 @@ int main(int argc, char* argv[]) {
         Mat4 view        = mat4_look_at(cam.position, cam_target, cam_up);
         Mat4 mvp         = mat4_mul(proj, mat4_mul(view, model));
         
-        sprintf(fps_str, "%d", fps);
+        snprintf(fps_str, 64, "fps: %d \ncamera pos (%.2f, %.2f, %.2f)", 
+            fps, cam.position.x, cam.position.y, cam.position.z);
 
         renderLoop(ren, WIN_HEIGHT, WIN_WIDTH, zbuffer, triangleCount, view, model,
                 tris, cam, mvp, triangleColours, pixelBuffer, texture, font, fps_str);

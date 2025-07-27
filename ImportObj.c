@@ -57,8 +57,6 @@ Triangle* LoadObjTriangles(const char* filename, int* out_count) {
     fclose(file);
     free(verts);
 
-    printf("Loaded %d triangles from %s\n", tri_count, filename);
-
     *out_count = tri_count;
     return tris;
 }
