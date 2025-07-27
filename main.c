@@ -5,6 +5,7 @@
 #include <math.h>
 #include <time.h>
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "renderer.h"
 #include "calcs.h"
@@ -114,6 +115,8 @@ int main(int argc, char* argv[]) {
         WIN_WIDTH, WIN_HEIGHT
     );
 
+    TTF_Font* font = TTF_OpenFont("./fonts/SF-Pro.ttf", 24);
+
     bool running = true;
     SDL_Event event;
 
@@ -148,7 +151,7 @@ int main(int argc, char* argv[]) {
         Mat4 mvp         = mat4_mul(proj, mat4_mul(view, model));
 
         renderLoop(ren, WIN_HEIGHT, WIN_WIDTH, zbuffer, triangleCount, view, model,
-                tris, cam, mvp, triangleColours, pixelBuffer, texture);
+                tris, cam, mvp, triangleColours, pixelBuffer, texture, font);
 
         // SDL_Delay(16);
     }

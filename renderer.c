@@ -88,9 +88,26 @@ void DrawTriangle(SDL_Renderer *ren, Triangle tri,
     }
 }
 
+SDL_Texture* DrawText(char *message, SDL_Color txtColour, SDL_Renderer *ren, TTF_Font *font) {
+    SDL_Texture *texture = NULL;
+
+    SDL_Surface *text = TTF_RenderText_Blended(font, message, 0, txtColour);
+
+    if (text) {
+        texture = SDL_CreateTextureFromSurface(ren, text);
+        SDL_DestroySurface(text);
+    }
+    if (!text) {
+        fprintf(stderr, "Failed to create text surface: %s\n", SDL_GetError());
+        return NULL;
+    }
+
+    return texture;
+}
+
 void renderLoop(SDL_Renderer *ren, int window_height, int window_width, float *zbuffer, int triangleCount, 
         Mat4 view, Mat4 model, Triangle *tris, Camera cam, Mat4 mvp, Vec4 *triangleColours, 
-        uint32_t *pixelBuffer, SDL_Texture *texture) {
+        uint32_t *pixelBuffer, SDL_Texture *texture, TTF_Font *font) {
     
     memset(pixelBuffer, 0, sizeof(uint32_t) * window_width * window_height);
 
@@ -126,6 +143,16 @@ void renderLoop(SDL_Renderer *ren, int window_height, int window_width, float *z
     SDL_UpdateTexture(texture, NULL, pixelBuffer, window_width * sizeof(uint32_t));
 
     SDL_RenderTexture(ren, texture, NULL, NULL);
+
+    SDL_Texture *textTexture = DrawText("Hello, World!", (SDL_Color){255, 255, 255, 255}, ren, font);
+    if (textTexture) {
+        float textW, textH;
+        SDL_GetTextureSize(textTexture, &textW, &textH);
+
+        SDL_FRect dstRect = {20, 20, (float)textW, (float)textH};
+        SDL_RenderTexture(ren, textTexture, NULL, &dstRect);
+        SDL_DestroyTexture(textTexture);
+    }
 
     SDL_RenderPresent(ren);
 }
