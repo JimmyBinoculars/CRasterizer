@@ -107,7 +107,7 @@ SDL_Texture* DrawText(char *message, SDL_Color txtColour, SDL_Renderer *ren, TTF
 
 void renderLoop(SDL_Renderer *ren, int window_height, int window_width, float *zbuffer, int triangleCount, 
         Mat4 view, Mat4 model, Triangle *tris, Camera cam, Mat4 mvp, Vec4 *triangleColours, 
-        uint32_t *pixelBuffer, SDL_Texture *texture, TTF_Font *font) {
+        uint32_t *pixelBuffer, SDL_Texture *texture, TTF_Font *font, char *message) {
     
     memset(pixelBuffer, 0, sizeof(uint32_t) * window_width * window_height);
 
@@ -144,7 +144,7 @@ void renderLoop(SDL_Renderer *ren, int window_height, int window_width, float *z
 
     SDL_RenderTexture(ren, texture, NULL, NULL);
 
-    SDL_Texture *textTexture = DrawText("Hello, World!", (SDL_Color){255, 255, 255, 255}, ren, font);
+    SDL_Texture *textTexture = DrawText(message, (SDL_Color){255, 255, 255, 255}, ren, font);
     if (textTexture) {
         float textW, textH;
         SDL_GetTextureSize(textTexture, &textW, &textH);

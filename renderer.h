@@ -14,5 +14,5 @@ SDL_Texture* DrawText(char *message, SDL_Color txtColour, SDL_Renderer *ren, TTF
 
 void renderLoop(SDL_Renderer *ren, int window_height, int window_width, float *zbuffer, int triangleCount, 
         Mat4 view, Mat4 model, Triangle *tris, Camera cam, Mat4 mvp, Vec4 *triangleColours, 
-        uint32_t *pixelBuffer, SDL_Texture *texture, TTF_Font *font);
+        uint32_t *pixelBuffer, SDL_Texture *texture, TTF_Font *font, char *message);
 #endif

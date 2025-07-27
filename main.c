@@ -126,7 +126,13 @@ int main(int argc, char* argv[]) {
     uint64_t lastTime = SDL_GetPerformanceCounter();
     double freq = (double)SDL_GetPerformanceFrequency();
     int frames = 0;
+    char *fps_str = malloc(12);
+    if (!fps_str) {
+        fprintf(stderr, "Failed to allocate fps_str");
+        return 1;
+    }
     double fpsTimer = 0.0;
+    int fps = 0;
 
     while (running) {
         uint64_t currentTime = SDL_GetPerformanceCounter();
@@ -136,8 +142,9 @@ int main(int argc, char* argv[]) {
         fpsTimer += deltaTime;
         frames++;
 
-        if (fpsTimer >= 1.0) {
-            printf("FPS: %d\n", frames);
+        if (fpsTimer >= 0.1) {
+            fps = (int)(frames / fpsTimer);
+            // printf("FPS: %d\n", fps);
             fpsTimer = 0.0;
             frames = 0;
         }
@@ -149,9 +156,11 @@ int main(int argc, char* argv[]) {
         Vec3 cam_up      = {0, 1, 0};
         Mat4 view        = mat4_look_at(cam.position, cam_target, cam_up);
         Mat4 mvp         = mat4_mul(proj, mat4_mul(view, model));
+        
+        sprintf(fps_str, "%d", fps);
 
         renderLoop(ren, WIN_HEIGHT, WIN_WIDTH, zbuffer, triangleCount, view, model,
-                tris, cam, mvp, triangleColours, pixelBuffer, texture, font);
+                tris, cam, mvp, triangleColours, pixelBuffer, texture, font, fps_str);
 
         // SDL_Delay(16);
     }
@@ -169,5 +178,6 @@ int main(int argc, char* argv[]) {
     free(triangleColours);
     free(zbuffer);
     free(pixelBuffer);
+    free(fps_str);
     return 0;
 }
