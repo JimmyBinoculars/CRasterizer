@@ -85,6 +85,19 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    uint32_t *pixelBuffer = malloc(sizeof(uint32_t) * WIN_WIDTH * WIN_HEIGHT);
+    if (!pixelBuffer) {
+        fprintf(stderr, "Failed to allocate pixelBuffer");
+        return 1;
+    }
+
+    SDL_Texture *texture = SDL_CreateTexture(
+        ren,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        WIN_WIDTH, WIN_HEIGHT
+    );
+
     bool running = true;
     SDL_Event event;
 
@@ -126,7 +139,7 @@ int main(int argc, char* argv[]) {
         Mat4 mvp         = mat4_mul(proj, mat4_mul(view, model));
         
         renderLoop(ren, WIN_HEIGHT, WIN_WIDTH, zbuffer, triangleCount, view, model,
-                tris, cam, mvp, triangleColours);
+                tris, cam, mvp, triangleColours, pixelBuffer, texture);
 
         // SDL_Delay(16);
     }
@@ -138,9 +151,11 @@ int main(int argc, char* argv[]) {
     // Destroy and free up memory
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
+    SDL_DestroyTexture(texture);
     SDL_Quit();
     free(tris);
     free(triangleColours);
     free(zbuffer);
+    free(pixelBuffer);
     return 0;
 }

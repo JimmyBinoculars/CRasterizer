@@ -6,9 +6,10 @@
 
 int WindowInit(SDL_Window **window, SDL_Renderer **rend, int width, int height);
 
-void DrawTriangle(SDL_Renderer *ren, Triangle tri, Mat4 mvp, int screen_width, 
-        int screen_height, Vec4 colours, float *zbuffer);
+void DrawTriangle(SDL_Renderer *ren, Triangle tri, 
+        Mat4 mvp, int screen_width, int screen_height, Vec4 colour, float *zbuffer, uint32_t *pixelBuffer);
 
 void renderLoop(SDL_Renderer *ren, int window_height, int window_width, float *zbuffer, int triangleCount, 
-        Mat4 view, Mat4 model, Triangle *tris, Camera cam, Mat4 mvp, Vec4 *triangleColours);
+        Mat4 view, Mat4 model, Triangle *tris, Camera cam, Mat4 mvp, Vec4 *triangleColours, 
+        uint32_t *pixelBuffer, SDL_Texture *texture);
 #endif

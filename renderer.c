@@ -27,7 +27,7 @@ int WindowInit(SDL_Window **window, SDL_Renderer **rend, int width, int height) 
 }
 
 void DrawTriangle(SDL_Renderer *ren, Triangle tri, 
-        Mat4 mvp, int screen_width, int screen_height, Vec4 colour, float *zbuffer) {
+        Mat4 mvp, int screen_width, int screen_height, Vec4 colour, float *zbuffer, uint32_t *pixelBuffer) {
     Vec4 p0 = mat4_mul_vec4(mvp, vec4_from_vec3(tri.v0.pos, 1.0f));
     Vec4 p1 = mat4_mul_vec4(mvp, vec4_from_vec3(tri.v1.pos, 1.0f));
     Vec4 p2 = mat4_mul_vec4(mvp, vec4_from_vec3(tri.v2.pos, 1.0f));
@@ -56,17 +56,11 @@ void DrawTriangle(SDL_Renderer *ren, Triangle tri,
     float depth1 = (p1.z + 1.0f) * 0.5f;
     float depth2 = (p2.z + 1.0f) * 0.5f;
 
-    SDL_SetRenderDrawColor(
-        ren,
-        (Uint8)(colour.x * 255.0f),
-        (Uint8)(colour.y * 255.0f),
-        (Uint8)(colour.z * 255.0f),
-        (Uint8)(colour.w * 255.0f)
-    );
-
     for (int y = min_y; y <= max_y; y++) {
         float *zrow = zbuffer + y * screen_width;
         for (int x = min_x; x <= max_x; x++) {
+            int pixelIndex = y * screen_width + x;
+
             float px = (float)x + 0.5f;
             float py = (float)y + 0.5f;
 
@@ -79,15 +73,24 @@ void DrawTriangle(SDL_Renderer *ren, Triangle tri,
 
                 if (depth > zrow[x]) {
                     zrow[x] = depth;
-                    SDL_RenderPoint(ren, x, y);
-                }
+                    pixelBuffer[pixelIndex] =
+                        ((Uint8)(colour.w * 255.0f) << 24) |
+                        ((Uint8)(colour.x * 255.0f) << 16) |
+                        ((Uint8)(colour.y * 255.0f) << 8)  |
+                        ((Uint8)(colour.z * 255.0f) << 0);
+
+                } 
             }
         }
     }
 }
 
 void renderLoop(SDL_Renderer *ren, int window_height, int window_width, float *zbuffer, int triangleCount, 
-        Mat4 view, Mat4 model, Triangle *tris, Camera cam, Mat4 mvp, Vec4 *triangleColours) {
+        Mat4 view, Mat4 model, Triangle *tris, Camera cam, Mat4 mvp, Vec4 *triangleColours, 
+        uint32_t *pixelBuffer, SDL_Texture *texture) {
+    
+    memset(pixelBuffer, 0, sizeof(uint32_t) * window_width * window_height);
+
     SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
     SDL_RenderClear(ren);
 
@@ -114,8 +117,12 @@ void renderLoop(SDL_Renderer *ren, int window_height, int window_width, float *z
 
         if (vec3_dot(normal, toCamera) < 0.0f) continue;
 
-        DrawTriangle(ren, *tri, mvp, window_width, window_height, triangleColours[i], zbuffer);
+        DrawTriangle(ren, *tri, mvp, window_width, window_height, triangleColours[i], zbuffer, pixelBuffer);
     }
+
+    SDL_UpdateTexture(texture, NULL, pixelBuffer, window_width * sizeof(uint32_t));
+
+    SDL_RenderTexture(ren, texture, NULL, NULL);
 
     SDL_RenderPresent(ren);
 }
