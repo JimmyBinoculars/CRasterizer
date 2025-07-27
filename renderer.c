@@ -24,6 +24,8 @@ int WindowInit(SDL_Window **window, SDL_Renderer **rend, int width, int height) 
         return 1;
     }
 
+    TTF_Init();
+
     return 0;
 }
 

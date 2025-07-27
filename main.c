@@ -28,6 +28,22 @@ int main(int argc, char* argv[]) {
     const float PITCH_LIMIT = 1.55f;
     const float MOUSE_SENSITIVITY = 0.001f;
 
+    // Parse command-line flags
+    char *obj_path = "../models/scene.obj"; // default path
+    int opt;
+    while ((opt = getopt(argc, argv, "f:")) != -1) {
+        switch (opt) {
+            case 'f':
+                obj_path = optarg;
+                break;
+            default:
+                fprintf(stderr, "Usage: %s [-f obj_file_path]\n", argv[0]);
+                return 1;
+        }
+    }
+
+    printf("OBJ path set to: %s\n", obj_path);
+
     SDL_Window* win = NULL;
     SDL_Renderer* ren = NULL;
 
@@ -36,16 +52,16 @@ int main(int argc, char* argv[]) {
 
     // Set our mouse mode
     SDL_SetWindowRelativeMouseMode(win, true);
-    
-    FILE* test = fopen("../models/scene.obj", "r");
+
+    FILE* test = fopen(obj_path, "r");
     if (!test) {
-        fprintf(stderr, "Failed to open OBJ file!\n");
+        fprintf(stderr, "Failed to open OBJ file: %s\n", obj_path);
         return 1;
     }
     fclose(test);
 
     int triangleCount = 0;
-    Triangle* tris = LoadObjTriangles("../models/scene.obj", &triangleCount);
+    Triangle* tris = LoadObjTriangles(obj_path, &triangleCount);
 
     if (!tris || triangleCount == 0) {
         fprintf(stderr, "OBJ loading failed or returned 0 triangles!\n");
@@ -57,7 +73,7 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "Failed to allocate vertex colours!\n");
         return 1;
     }
-    
+
     for (int i = 0; i < triangleCount; i++) {
         triangleColours[i] = (Vec4){
             (float)(rand() % 256) / 255.0f,
@@ -67,7 +83,7 @@ int main(int argc, char* argv[]) {
         };
     }
 
-    printf("Loaded %d triangles\n", triangleCount);
+    printf("Loaded %d triangles from %s\n", triangleCount, obj_path);
 
     Mat4 model = mat4_identity();
     Camera cam = {
@@ -78,7 +94,7 @@ int main(int argc, char* argv[]) {
 
     Mat4 proj = mat4_perspective(70.0f * (3.14159f / 180.0f), (float)WIN_WIDTH / WIN_HEIGHT, 0.1f, 100.0f);
     if (!tris) return 1;
-    
+
     float* zbuffer = malloc(sizeof(float) * WIN_WIDTH * WIN_HEIGHT);
     if (!zbuffer) {
         fprintf(stderr, "Failed to allocate zbuffer");
@@ -130,13 +146,13 @@ int main(int argc, char* argv[]) {
         Vec3 cam_up      = {0, 1, 0};
         Mat4 view        = mat4_look_at(cam.position, cam_target, cam_up);
         Mat4 mvp         = mat4_mul(proj, mat4_mul(view, model));
-        
+
         renderLoop(ren, WIN_HEIGHT, WIN_WIDTH, zbuffer, triangleCount, view, model,
                 tris, cam, mvp, triangleColours, pixelBuffer, texture);
 
         // SDL_Delay(16);
     }
-    
+
     // Reset our mouse
     SDL_SetWindowRelativeMouseMode(win, false);
     SDL_WarpMouseInWindow(win, WIN_WIDTH/2, WIN_HEIGHT/2);
