@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
     uint64_t lastTime = SDL_GetPerformanceCounter();
     double freq = (double)SDL_GetPerformanceFrequency();
     int frames = 0;
-    char *fps_str = malloc(64);
+    char *fps_str = malloc(128);
     if (!fps_str) {
         fprintf(stderr, "Failed to allocate fps_str");
         return 1;
@@ -134,10 +134,13 @@ int main(int argc, char* argv[]) {
     double fpsTimer = 0.0;
     int fps = 0;
 
+    int vSync = SDL_GetHintBoolean("SDL_RENDER_VSYNC", false);
+
     while (running) {
         uint64_t currentTime = SDL_GetPerformanceCounter();
         double deltaTime = (currentTime - lastTime) / freq;
         lastTime = currentTime;
+        vSync = SDL_GetHintBoolean("SDL_RENDER_VSYNC", false);
 
         fpsTimer += deltaTime;
         frames++;
@@ -157,9 +160,9 @@ int main(int argc, char* argv[]) {
         Mat4 view        = mat4_look_at(cam.position, cam_target, cam_up);
         Mat4 mvp         = mat4_mul(proj, mat4_mul(view, model));
         
-        snprintf(fps_str, 64, "fps: %d \ncamera pos (%.2f, %.2f, %.2f) \nyaw: %.2f pitch: %.2f", 
+        snprintf(fps_str, 128, "fps: %d \n cam: (%.2f, %.2f, %.2f) \n yaw: %.2f | pitch: %.2f \n vsync: %s",
             fps, cam.position.x, cam.position.y, cam.position.z,
-            cam.yaw, cam.pitch);
+            cam.yaw, cam.pitch, vSync ? "enabled" : "disabled");
 
         renderLoop(ren, WIN_HEIGHT, WIN_WIDTH, zbuffer, triangleCount, view, model,
                 tris, cam, mvp, triangleColours, pixelBuffer, texture, font, fps_str);
