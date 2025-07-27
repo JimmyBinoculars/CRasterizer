@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     // Set our mouse mode
     SDL_SetWindowRelativeMouseMode(win, true);
     
-    FILE* test = fopen("../models/suzanne.obj", "r");
+    FILE* test = fopen("../models/scene.obj", "r");
     if (!test) {
         fprintf(stderr, "Failed to open OBJ file!\n");
         return 1;
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     fclose(test);
 
     int triangleCount = 0;
-    Triangle* tris = LoadObjTriangles("../models/suzanne.obj", &triangleCount);
+    Triangle* tris = LoadObjTriangles("../models/scene.obj", &triangleCount);
 
     if (!tris || triangleCount == 0) {
         fprintf(stderr, "OBJ loading failed or returned 0 triangles!\n");
