@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
     uint64_t lastTime = SDL_GetPerformanceCounter();
     double freq = (double)SDL_GetPerformanceFrequency();
     int frames = 0;
-    char *fps_str = malloc(12);
+    char *fps_str = malloc(64);
     if (!fps_str) {
         fprintf(stderr, "Failed to allocate fps_str");
         return 1;
