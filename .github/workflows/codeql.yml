@@ -1,14 +1,3 @@
-# For most projects, this workflow file will not need changing; you simply need
-# to commit it to your repository.
-#
-# You may wish to alter this file to override the set of languages analyzed,
-# or to provide custom queries or build logic.
-#
-# ******** NOTE ********
-# We have attempted to detect the languages in your repository. Please check
-# the `language` matrix defined below to confirm you have the correct set of
-# supported CodeQL languages.
-#
 name: "CodeQL Advanced"
 
 on:
@@ -40,12 +29,16 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Install/build SDL3 and SDL3_ttf
+    # Install SDL3 build dependencies (including X11 and Wayland dev libs)
     - if: matrix.build-mode == 'manual'
-      name: Install SDL3 & SDL3_ttf
+      name: Install SDL3 dependencies and build SDL3 & SDL3_ttf from source if needed
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake pkg-config libfreetype6-dev
+        sudo apt-get install -y build-essential cmake pkg-config \
+          libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev \
+          libwayland-dev libwayland-egl-backend-dev libdbus-1-dev libudev-dev libgles2-mesa-dev \
+          libdrm-dev libgbm-dev libpipewire-0.3-dev libpulse-dev libasound2-dev libjack-jackd2-dev \
+          libfreetype6-dev libexpat1-dev
 
         # Try distro packages first
         if sudo apt-get install -y libsdl3-dev libsdl3-ttf-dev; then
